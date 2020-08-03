@@ -5,4 +5,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  globalSetup: './config/authSetup.js',
+  setupFilesAfterEnv: ['./config/jest.setup.js']
 };

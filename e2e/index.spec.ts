@@ -1,23 +1,36 @@
 /// <reference types="jest-playwright-preset" />
-
-beforeEach(async () => {
-  await jestPlaywright.resetContext();
-});
+const fs = require('fs');
 
 describe('test suite 1', () => {
-  it('should display "google" text on page', async () => {
-    await page.goto('https://whatismybrowser.com/')
-    const browser = await page.$eval('.string-major', (el) => el.innerHTML);
-    expect(browser).toContain('Chrome');
+  beforeAll(async () => {
+    const cookies = process.env.COOKIES;
+    const localStorage = process.env.LOCALSTORAGE;
 
-    // Fail to generate screenshot
-    expect(1).toBe(2);
+    // Some apps only need cookies (not local storage)
+    context.addCookies(JSON.parse(cookies));
+    context.addInitScript(([storageDump]) => {
+      if (window.location.hostname === 'online.visualstudio.com') {
+        console.log(storageDump.length);
+        const entries = JSON.parse(storageDump);
+        Object.keys(entries).forEach(k => {
+          window.localStorage.setItem(k, entries[k]);
+        });
+      }
+    }, [localStorage]);
   });
 
-  it('should reset the page', async () => {
-    expect(page.url()).toBe('about:blank');
+  it('should be logged in', async () => {
+    const page = await context.newPage();
+    await page.goto('https://online.visualstudio.com/environments');
+    const element = await page.waitForSelector('text="Create Codespace"');
+    expect(element).toBeTruthy();
+    await page.close();
+  });
 
-    // Fail to generate screenshot
+  it('should always fail', async () => {
+    const page = await context.newPage();
+    await page.goto('https://online.visualstudio.com/environments');
+    // To generate the screenshots on failure
     expect(1).toBe(2);
   });
 });
