@@ -7,8 +7,8 @@ describe('test suite 1', () => {
     const localStorage = process.env.LOCALSTORAGE;
 
     // Some apps only need cookies (not local storage)
-    context.addCookies(JSON.parse(cookies));
-    context.addInitScript(([storageDump]) => {
+    await context.addCookies(JSON.parse(cookies));
+    await context.addInitScript(([storageDump]) => {
       if (window.location.hostname === 'online.visualstudio.com') {
         console.log(storageDump.length);
         const entries = JSON.parse(storageDump);
